@@ -1,0 +1,45 @@
+/* reset */
+* {
+	box-sizing: border-box;
+}
+
+body, html {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+/* layout */
+.layout {
+	display: grid;
+
+	grid-template-columns: 1fr;
+	grid-template-rows: 1fr;
+	grid-template-areas:
+		"content"
+	;
+	height: 100%;
+}
+.content {
+	grid-area: content;
+
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 1fr;
+	grid-template-areas:
+		"editor"
+	;
+}
+.editor {
+	grid-area: editor;
+}
+
+/* styles */
+.content {
+	background-color: #272822;
+
+	padding: 1em;
+	/* TODO: decide: adjust for gutter... */
+	padding-left: calc(1em - 14px);
+}
