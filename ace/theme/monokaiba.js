@@ -33,8 +33,9 @@ define('ace/theme/monokaiba', function(require, exports, module) {
 exports.isDark = true;
 exports.padding = 0;
 exports.cssClass = "ace-monokaiba";
+// TODO: figure out/fix up require's
 exports.cssText = require("../requirejs/text!./monokaiba.css");
 
-var dom = require("../lib/dom");
+var dom = require("ace/lib/dom");
 dom.importCssString(exports.cssText, exports.cssClass);
 });
