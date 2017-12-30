@@ -1,10 +1,35 @@
 define("ace/mode/note_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"], function(require, exports, module) {
 "use strict";
 
+function findValueBySuffix(object, suffix) {
+  for (var property in object) {
+    if (object.hasOwnProperty(property) &&
+       property.toString().endsWith(suffix)) {
+       return object[property];
+    }
+  }
+}
+
 var oop = require("../lib/oop");
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
+var config = require("../config"); // ace/config
+
+const STACK_RULE = 0;
+const STACK_INDENT = 1;
+const STACK_LANGUAGE = 2;
+
+const LANGUAGES = [
+	// TODO: more
+	'javascript',
+	'css',
+	'php',
+];
+
 var NoteHighlightRules = function() {
+	// TODO: actually the only name I can come up with this late at night
+	var OhGeezNoteHighlightRules = this;
+
 	this.$rules = {
 		"start": [
 			// TODO: should add tokens that are more specific to my use case...
@@ -36,56 +61,132 @@ var NoteHighlightRules = function() {
 				regex: /^\s*!!\s+.*/,
 				token: 'invalid',
 			},
-			// TODO: sub-languages...
 			{
-				token: "comment", // TODO: decide if I'd rather this use: (comment/string/punctuation)
-				regex: /:\w+[-+\d\s]*$/,
+				token: "comment",
+				// TODO: having the caret fucks with things a bit (fix)
+				regex: /^\s*:(\S+)$/, // TODO: might need to open this up (maybe just anything except for space...)
 				onMatch: function(val, state, stack, line) {
 					var indent = /^\s*/.exec(line)[0];
-					if (stack.length < 1) {
-						stack.push(this.next);
-					} else {
-						stack[0] = "language";
-					}
+					var language = /^\s*:(\S+)$/.exec(line)[1];
 
-					if (stack.length < 2) {
-						stack.push(indent.length);
-					}
-					else {
-						stack[1] = indent.length;
-					}
+					// TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
+					stack[STACK_RULE] = this.next;
+					// TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
+					stack[STACK_INDENT] = indent.length;
+					stack[STACK_LANGUAGE] = language;
+
 					return this.token;
 				},
-				next: "language"
+				// next: "language",
+				next: function(state, stack) {
+					var language = stack[STACK_LANGUAGE];
+					var prefix = language + '-';
+
+					// var embeds = OhGeezNoteHighlightRules.getEmbeds() || [];
+					// if (embeds.indexOf(prefix) == -1) {
+					// 	// not in embeds yet
+
+					// 	// load rules
+					// 	// TODO: lot's of ugh around here...
+					// 	// var highlightRules = require("ace/mode/javascript_highlight_rules").JavascriptHighlightRules;
+
+					// 	// dynamic loading of language... but then we have to delay and re-evaluate syntax afterwards...
+					// 	// var modee = 'ace/mode/php';
+					// 	// config.loadModule(['mode', modee], function(m) {
+					// 	// 	console.log(m);
+					// 	// });
+
+					// 	var mode = require("ace/mode/" + language);
+					// 	var highlightRules = mode.HighlightRules;
+						
+					// 	// TODO: but what about the mode, can wel call? createModeDelegates here?
+					// 	OhGeezNoteHighlightRules.embedRules(highlightRules, prefix, [
+					// 		// {
+					// 		// 	token : "keyword",
+					// 		// 	regex: "^endstyle\\s*$",
+					// 		// 	next  : "start"
+					// 		// }
+					// 		// {
+					// 		// 	token: "indent",
+					// 		// 	regex: /^\s*$/
+					// 		// },
+					// 		// {
+					// 		// 	token: "indent",
+					// 		// 	regex: /^\s*/,
+					// 		// 	onMatch: function(val, state, stack) {
+					// 		// 		var curIndent = stack[STACK_INDENT];
+
+					// 		// 		if (curIndent >= val.length) {
+					// 		// 			this.next = "start";
+					// 		// 			stack.splice(0); // empty the array
+					// 		// 		}
+					// 		// 		else {
+					// 		// 			this.next = "language";
+					// 		// 		}
+					// 		// 		return this.token;
+					// 		// 	},
+					// 		// 	next: "language"
+					// 		// },
+					// 		// {
+					// 		// 	// TODO: this is not really things... sould only apply if no language matches it
+					// 		// 	token: "punctuation",
+					// 		// 	regex: '.+'
+					// 		// }
+					// 	]);
+
+					// 	return "start";
+					// }
+
+					// TODO: if language is unknown, decide how to handle
+					return prefix + "start";
+				}
 			},
 		],
-		"language": [
-			{
-				token: "indent",
-				regex: /^\s*$/
-			},
+	};
+
+	for (var i = 0; i < LANGUAGES.length; i++) {
+		var language = LANGUAGES[i];
+		var prefix = language + '-';
+
+		// TODO: figure out how to make something like this work instead...
+		// var mode = require("ace/mode/" + language);
+		// var highlightRules = mode.HighlightRules;
+		var mode = require("ace/mode/" + language + "_highlight_rules");
+		var highlightRules = findValueBySuffix(mode, 'HighlightRules');
+
+		// TODO: but what about the mode, can wel call? createModeDelegates here?
+		this.embedRules(highlightRules, prefix, [
+			// {
+			// 	token: "indent",
+			// 	regex: /^\s*$/
+			// },
 			{
 				token: "indent",
 				regex: /^\s*/,
 				onMatch: function(val, state, stack) {
-					var curIndent = stack[1];
+					var curIndent = stack[STACK_INDENT];
+					console.log('stack');
+					console.log(stack);
 
-					if (curIndent >= val.length) {
-						this.next = "start";
-						stack.splice(0);
-					}
-					else {
-						this.next = "language";
-					}
+					// if (curIndent >= val.length) {
+					// 	this.next = "start";
+					// 	stack.splice(0); // empty the array
+					// }
+					// else {
+					// 	this.next = prefix + "start";
+					// }
 					return this.token;
 				},
-				next: "language"
+				next: prefix + "start"
 			},
-			{
-				token: "punctuation",
-				regex: '.+'
-			}
-		]};
+			// {
+			// 	// TODO: this is not really things... sould only apply if no language matches it
+			// 	token: "punctuation",
+			// 	regex: '.+'
+			// }
+		]);
+	}
+
 	this.normalizeRules();
 
 };
@@ -263,7 +364,6 @@ oop.inherits(Mode, TextMode);
 	this.autoOutdent = function(state, doc, row) {
 		this.$outdent.autoOutdent(doc, row);
 	};
-
 
 	this.$id = "ace/mode/note";
 }).call(Mode.prototype);

@@ -35,6 +35,45 @@ document.addEventListener('DOMContentLoaded', function() {
 			'			var editor = ace.edit("editor");\n' +
 			'			init_editor(editor);\n' +
 			'		});\n' +
+			'	:css\n' +
+			'\
+		.text-layer {\n\
+		    font: 12px Monaco, "Courier New", monospace;\n\
+		    cursor: text;\n\
+		}\n\
+		\n\
+		.blinker {\n\
+		    animation: blink 1s linear infinite alternate;\n\
+		}\n\
+		\n\
+		@keyframes blink {\n\
+		    0%, 40% {\n\
+		        opacity: 0; /*\n\
+		        */\n\
+		        opacity: 1\n\
+		    }\n\
+		\n\
+		    40.5%, 100% {\n\
+		        opacity: 1\n\
+		    }\n\
+		}\n\
+		\n\
+		@document url(http://c9.io/), url-prefix(http://ace.c9.io/build/),\n\
+		   domain(c9.io), regexp("https:.*") /**/\n\
+		{\n\
+		    /**/\n\
+		    img[title]:before \n\
+		    {\n\
+		        content: attr(title) "\AImage \\\n\
+		            retrieved from"\n\
+		            attr(src); /*\n\
+		            */\n\
+		        white-space: pre;\n\
+		        display: block;\n\
+		        background: url(asdasd); "err\n\
+		    }\n\
+		}\n\
+		\n' +
 			'	:php\n' +
 			'		<?php\n' +
 			'\n' +
