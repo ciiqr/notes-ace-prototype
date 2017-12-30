@@ -7,6 +7,7 @@ var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 var NoteHighlightRules = function() {
 	this.$rules = {
 		"start": [
+			// TODO: should add tokens that are more specific to my use case...
 			{
 				regex: /^\s*#.*/,
 				token: 'comment',
@@ -35,7 +36,6 @@ var NoteHighlightRules = function() {
 				regex: /^\s*!!\s+.*/,
 				token: 'invalid',
 			},
-
 			// TODO: sub-languages...
 			{
 				token: "comment", // TODO: decide if I'd rather this use: (comment/string/punctuation)
@@ -45,7 +45,7 @@ var NoteHighlightRules = function() {
 					if (stack.length < 1) {
 						stack.push(this.next);
 					} else {
-						stack[0] = "mlString";
+						stack[0] = "language";
 					}
 
 					if (stack.length < 2) {
@@ -56,10 +56,10 @@ var NoteHighlightRules = function() {
 					}
 					return this.token;
 				},
-				next: "mlString"
+				next: "language"
 			},
 		],
-		"mlString": [
+		"language": [
 			{
 				token: "indent",
 				regex: /^\s*$/
@@ -75,11 +75,11 @@ var NoteHighlightRules = function() {
 						stack.splice(0);
 					}
 					else {
-						this.next = "mlString";
+						this.next = "language";
 					}
 					return this.token;
 				},
-				next: "mlString"
+				next: "language"
 			},
 			{
 				token: "punctuation",
