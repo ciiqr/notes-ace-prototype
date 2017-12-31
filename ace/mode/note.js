@@ -23,7 +23,9 @@ const LANGUAGES = [
 	// TODO: more
 	'javascript',
 	'css',
+	'yaml',
 	'php',
+	'c_cpp',
 ];
 
 var NoteHighlightRules = function() {
@@ -64,22 +66,53 @@ var NoteHighlightRules = function() {
 			{
 				token: "comment",
 				// TODO: having the caret fucks with things a bit (fix)
-				regex: /^\s*:(\S+)$/, // TODO: might need to open this up (maybe just anything except for space...)
+				regex: /\s*:(\S+)$/, // TODO: might need to open this up (maybe just anything except for space...)
 				onMatch: function(val, state, stack, line) {
-					var indent = /^\s*/.exec(line)[0];
-					var language = /^\s*:(\S+)$/.exec(line)[1];
+					var indent = /\s*/.exec(line)[0];
+					var language = /\s*:(\S+)$/.exec(line)[1];
+
+					var yep = {
+						// TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
+						indent: indent.length,
+						language: language,
+					};
 
 					// TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
-					stack[STACK_RULE] = this.next;
-					// TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
-					stack[STACK_INDENT] = indent.length;
-					stack[STACK_LANGUAGE] = language;
+					var prefix = language + '-';
+					var nxt = prefix + "start";
+					if (stack.length < 1) {
+						stack.push(nxt);
+					} else {
+						stack[0] = nxt;
+					}
+
+					if (stack.length < 2) {
+						stack.push(yep);
+					} else {
+						stack[1] = yep;
+					}
+
+					stack.push({
+						rule: prefix + "start",
+						// TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
+						indent: indent.length,
+						language: language,
+					});
+
+					// // TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
+					// stack[STACK_RULE] = this.next;
+					// // TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
+					// stack[STACK_INDENT] = indent.length;
+					// stack[STACK_LANGUAGE] = language;
 
 					return this.token;
 				},
 				// next: "language",
 				next: function(state, stack) {
-					var language = stack[STACK_LANGUAGE];
+					// var yep = stack.pop();
+					var yep = stack[stack.length - 1];
+
+					var language = yep.language;
 					var prefix = language + '-';
 
 					// var embeds = OhGeezNoteHighlightRules.getEmbeds() || [];
@@ -156,34 +189,35 @@ var NoteHighlightRules = function() {
 
 		// TODO: but what about the mode, can wel call? createModeDelegates here?
 		this.embedRules(highlightRules, prefix, [
-			// {
-			// 	token: "indent",
-			// 	regex: /^\s*$/
-			// },
+			{
+				token: "indent",
+				regex: /^\s*$/
+			},
 			{
 				token: "indent",
 				regex: /^\s*/,
 				onMatch: function(val, state, stack) {
-					var curIndent = stack[STACK_INDENT];
-					console.log('stack');
-					console.log(stack);
+					// var yep = stack.pop();
+					var yep = stack[stack.length - 1];
+					var languageIndent = yep.indent;
+					// var languageIndent = stack[stack.length - 2];
+					// console.log('stack', languageIndent);
+					// console.log(JSON.stringify(val), val.length);
 
-					// if (curIndent >= val.length) {
-					// 	this.next = "start";
-					// 	stack.splice(0); // empty the array
-					// }
-					// else {
-					// 	this.next = prefix + "start";
-					// }
+					if (val.length <= languageIndent) {
+					// if (languageIndent >= val.length) {
+						this.next = "start";
+						console.log(JSON.stringify(stack));
+						stack.splice(0); // empty the array
+						// stack.pop(); // empty the array
+						// stack.splice(-1);
+						console.log(JSON.stringify(stack));
+					}
+
 					return this.token;
 				},
 				next: prefix + "start"
 			},
-			// {
-			// 	// TODO: this is not really things... sould only apply if no language matches it
-			// 	token: "punctuation",
-			// 	regex: '.+'
-			// }
 		]);
 	}
 

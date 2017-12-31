@@ -35,45 +35,109 @@ document.addEventListener('DOMContentLoaded', function() {
 			'			var editor = ace.edit("editor");\n' +
 			'			init_editor(editor);\n' +
 			'		});\n' +
-			'	:css\n' +
-			'\
-		.text-layer {\n\
-		    font: 12px Monaco, "Courier New", monospace;\n\
-		    cursor: text;\n\
-		}\n\
+		// 	'	:css\n' +
+		// 	'\
+		// .text-layer {\n\
+		//     font: 12px Monaco, "Courier New", monospace;\n\
+		//     cursor: text;\n\
+		// }\n\
+		// \n\
+		// .blinker {\n\
+		//     animation: blink 1s linear infinite alternate;\n\
+		// }\n\
+		// \n\
+		// @keyframes blink {\n\
+		//     0%, 40% {\n\
+		//         opacity: 0; /*\n\
+		//         */\n\
+		//         opacity: 1\n\
+		//     }\n\
+		// \n\
+		//     40.5%, 100% {\n\
+		//         opacity: 1\n\
+		//     }\n\
+		// }\n\
+		// \n\
+		// @document url(http://c9.io/), url-prefix(http://ace.c9.io/build/),\n\
+		//    domain(c9.io), regexp("https:.*") /**/\n\
+		// {\n\
+		//     /**/\n\
+		//     img[title]:before \n\
+		//     {\n\
+		//         content: attr(title) "\AImage \\\n\
+		//             retrieved from"\n\
+		//             attr(src); /*\n\
+		//             */\n\
+		//         white-space: pre;\n\
+		//         display: block;\n\
+		//         background: url(asdasd); "err\n\
+		//     }\n\
+		// }\n\
+		// \n' +
+'\n\
+	:c_cpp\n\
+		using namespace std;\n\
 		\n\
-		.blinker {\n\
-		    animation: blink 1s linear infinite alternate;\n\
-		}\n\
-		\n\
-		@keyframes blink {\n\
-		    0%, 40% {\n\
-		        opacity: 0; /*\n\
-		        */\n\
-		        opacity: 1\n\
-		    }\n\
-		\n\
-		    40.5%, 100% {\n\
-		        opacity: 1\n\
-		    }\n\
-		}\n\
-		\n\
-		@document url(http://c9.io/), url-prefix(http://ace.c9.io/build/),\n\
-		   domain(c9.io), regexp("https:.*") /**/\n\
+		//\n\
+		int main ()\n\
 		{\n\
-		    /**/\n\
-		    img[title]:before \n\
-		    {\n\
-		        content: attr(title) "\AImage \\\n\
-		            retrieved from"\n\
-		            attr(src); /*\n\
-		            */\n\
-		        white-space: pre;\n\
-		        display: block;\n\
-		        background: url(asdasd); "err\n\
-		    }\n\
+			int a, b=3; /* foobar */\n\
+			a = b; // single line comment\\\n\
+				continued\n\
+			a+=2; // equivalent to a=a+2\n\
+			cout << a;\n\
+			#if VERBOSE >= 2\n\
+				prints("trace message\\n");\n\
+			#endif\n\
+			return 0;\n\
 		}\n\
-		\n' +
+' +
+'\
+	:yaml\n\
+		invoice: 34843\n\
+		date   : 2001-01-23\n\
+		bill-to: &id001\n\
+			given  : Chris\n\
+			family : Dumars\n\
+			address:\n\
+				lines: |\n\
+					458 Walkman Dr.\n\
+					Suite #292\n\
+				city    : Royal Oak\n\
+				state   : MI\n\
+				postal  : 48046\n\
+		ship-to: *id001\n\
+		product:\n\
+			- sku         : BL394D\n\
+			  quantity    : 4\n\
+			  description : Basketball\n\
+			  price       : 450.00\n\
+			- sku         : BL4438H\n\
+			  quantity    : 1\n\
+			  description : Super Hoop\n\
+			  price       : 2392.00\n\
+		tax  : 251.42\n\
+		total: 4443.52\n\
+' +
+'\n\
+	:c_cpp\n\
+		using namespace std;\n\
+		\n\
+		//\n\
+		int main ()\n\
+		{\n\
+			int a, b=3; /* foobar */\n\
+			a = b; // single line comment\\\n\
+				continued\n\
+			a+=2; // equivalent to a=a+2\n\
+			cout << a;\n\
+			#if VERBOSE >= 2\n\
+				prints("trace message\\n");\n\
+			#endif\n\
+			return 0;\n\
+		}\n\
+' +
+
 			'	:php\n' +
 			'		<?php\n' +
 			'\n' +
