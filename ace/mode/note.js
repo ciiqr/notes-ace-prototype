@@ -68,6 +68,7 @@ var NoteHighlightRules = function() {
 				// TODO: having the caret fucks with things a bit (fix)
 				regex: /\s*:(\S+)$/, // TODO: might need to open this up (maybe just anything except for space...)
 				onMatch: function(val, state, stack, line) {
+					// console.log('state', state);
 					var indent = /\s*/.exec(line)[0];
 					var language = /\s*:(\S+)$/.exec(line)[1];
 
@@ -80,31 +81,13 @@ var NoteHighlightRules = function() {
 					// TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
 					var prefix = language + '-';
 					var nxt = prefix + "start";
-					if (stack.length < 1) {
-						stack.push(nxt);
-					} else {
-						stack[0] = nxt;
-					}
 
-					if (stack.length < 2) {
-						stack.push(yep);
-					} else {
-						stack[1] = yep;
-					}
-
-					stack.push({
+					stack.unshift(nxt, {
 						rule: prefix + "start",
 						// TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
 						indent: indent.length,
 						language: language,
 					});
-
-					// // TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
-					// stack[STACK_RULE] = this.next;
-					// // TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
-					// stack[STACK_INDENT] = indent.length;
-					// stack[STACK_LANGUAGE] = language;
-
 					return this.token;
 				},
 				// next: "language",
@@ -131,7 +114,7 @@ var NoteHighlightRules = function() {
 
 					// 	var mode = require("ace/mode/" + language);
 					// 	var highlightRules = mode.HighlightRules;
-						
+
 					// 	// TODO: but what about the mode, can wel call? createModeDelegates here?
 					// 	OhGeezNoteHighlightRules.embedRules(highlightRules, prefix, [
 					// 		// {
@@ -196,9 +179,12 @@ var NoteHighlightRules = function() {
 			{
 				token: "indent",
 				regex: /^\s*/,
-				onMatch: function(val, state, stack) {
+				onMatch: function(val, state, stack) {console.log('stack[1]', stack[1]);
 					// var yep = stack.pop();
-					var yep = stack[stack.length - 1];
+					var yep = stack[1];
+					if (!yep) {
+						return this.token;
+					}
 					var languageIndent = yep.indent;
 					// var languageIndent = stack[stack.length - 2];
 					// console.log('stack', languageIndent);
@@ -209,6 +195,9 @@ var NoteHighlightRules = function() {
 						this.next = "start";
 						console.log(JSON.stringify(stack));
 						stack.splice(0); // empty the array
+						// stack.splice(stack.length);
+						// stack.shift();
+						// stack.shift();
 						// stack.pop(); // empty the array
 						// stack.splice(-1);
 						console.log(JSON.stringify(stack));
