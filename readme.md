@@ -1,3 +1,3 @@
 # notes-ace-prototype
 
-https://ciiqr.github.io/notes/
+https://ciiqr.github.io/notes-ace-prototype/
