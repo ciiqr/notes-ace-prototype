@@ -20,208 +20,208 @@ const STACK_INDENT = 1;
 const STACK_LANGUAGE = 2;
 
 const LANGUAGES = [
-	// TODO: more
-	'javascript',
-	'css',
-	'yaml',
-	'php',
-	'c_cpp',
+    // TODO: more
+    'javascript',
+    'css',
+    'yaml',
+    'php',
+    'c_cpp',
 ];
 
 var NoteHighlightRules = function() {
-	// TODO: actually the only name I can come up with this late at night
-	var OhGeezNoteHighlightRules = this;
+    // TODO: actually the only name I can come up with this late at night
+    var OhGeezNoteHighlightRules = this;
 
-	this.$rules = {
-		"start": [
-			// TODO: should add tokens that are more specific to my use case...
-			{
-				regex: /^\s*#.*/,
-				token: 'comment',
-			},
-			{
-				regex: /^\s*x\s+.*/,
-				token: 'variable',
-			},
-			{
-				regex: /^\s*(\?|~)\s+.*/,
-				token: 'support.function',
-			},
-			{
-				regex: /^\s*%\s+.*/,
-				token: 'string',
-			},
-			{
-				regex: /^\s*-\s+.*/,
-				token: 'variable.parameter',
-			},
-			{
-				regex: /^\s*!\s+.*/,
-				token: 'keyword',
-			},
-			{
-				regex: /^\s*!!\s+.*/,
-				token: 'invalid',
-			},
-			{
-				token: "comment",
-				// TODO: having the caret fucks with things a bit (fix)
-				regex: /\s*:(\S+)$/, // TODO: might need to open this up (maybe just anything except for space...)
-				onMatch: function(val, state, stack, line) {
-					var indent = /\s*/.exec(line)[0];
-					var language = /\s*:(\S+)$/.exec(line)[1];
+    this.$rules = {
+        "start": [
+            // TODO: should add tokens that are more specific to my use case...
+            {
+                regex: /^\s*#.*/,
+                token: 'comment',
+            },
+            {
+                regex: /^\s*x\s+.*/,
+                token: 'variable',
+            },
+            {
+                regex: /^\s*(\?|~)\s+.*/,
+                token: 'support.function',
+            },
+            {
+                regex: /^\s*%\s+.*/,
+                token: 'string',
+            },
+            {
+                regex: /^\s*-\s+.*/,
+                token: 'variable.parameter',
+            },
+            {
+                regex: /^\s*!\s+.*/,
+                token: 'keyword',
+            },
+            {
+                regex: /^\s*!!\s+.*/,
+                token: 'invalid',
+            },
+            {
+                token: "comment",
+                // TODO: having the caret fucks with things a bit (fix)
+                regex: /\s*:(\S+)$/, // TODO: might need to open this up (maybe just anything except for space...)
+                onMatch: function(val, state, stack, line) {
+                    var indent = /\s*/.exec(line)[0];
+                    var language = /\s*:(\S+)$/.exec(line)[1];
 
-					var yep = {
-						// TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
-						indent: indent.length,
-						language: language,
-					};
+                    var yep = {
+                        // TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
+                        indent: indent.length,
+                        language: language,
+                    };
 
-					// TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
-					var prefix = language + '-';
-					var nxt = prefix + "start";
-					if (stack.length < 1) {
-						stack.push(nxt);
-					} else {
-						stack[0] = nxt;
-					}
+                    // TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
+                    var prefix = language + '-';
+                    var nxt = prefix + "start";
+                    if (stack.length < 1) {
+                        stack.push(nxt);
+                    } else {
+                        stack[0] = nxt;
+                    }
 
-					if (stack.length < 2) {
-						stack.push(yep);
-					} else {
-						stack[1] = yep;
-					}
+                    if (stack.length < 2) {
+                        stack.push(yep);
+                    } else {
+                        stack[1] = yep;
+                    }
 
-					stack.push({
-						rule: prefix + "start",
-						// TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
-						indent: indent.length,
-						language: language,
-					});
+                    stack.push({
+                        rule: prefix + "start",
+                        // TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
+                        indent: indent.length,
+                        language: language,
+                    });
 
-					// // TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
-					// stack[STACK_RULE] = this.next;
-					// // TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
-					// stack[STACK_INDENT] = indent.length;
-					// stack[STACK_LANGUAGE] = language;
+                    // // TODO: or idk, why don't we just puit an object into the stack at 0? that would be even better
+                    // stack[STACK_RULE] = this.next;
+                    // // TODO: eventually: consider text mixed with tabs and spaces, this won't work too well as it is (but maybe we just force those things to be fixed)
+                    // stack[STACK_INDENT] = indent.length;
+                    // stack[STACK_LANGUAGE] = language;
 
-					return this.token;
-				},
-				// next: "language",
-				next: function(state, stack) {
-					// var yep = stack.pop();
-					var yep = stack[stack.length - 1];
+                    return this.token;
+                },
+                // next: "language",
+                next: function(state, stack) {
+                    // var yep = stack.pop();
+                    var yep = stack[stack.length - 1];
 
-					var language = yep.language;
-					var prefix = language + '-';
+                    var language = yep.language;
+                    var prefix = language + '-';
 
-					// var embeds = OhGeezNoteHighlightRules.getEmbeds() || [];
-					// if (embeds.indexOf(prefix) == -1) {
-					// 	// not in embeds yet
+                    // var embeds = OhGeezNoteHighlightRules.getEmbeds() || [];
+                    // if (embeds.indexOf(prefix) == -1) {
+                    //  // not in embeds yet
 
-					// 	// load rules
-					// 	// TODO: lot's of ugh around here...
-					// 	// var highlightRules = require("ace/mode/javascript_highlight_rules").JavascriptHighlightRules;
+                    //  // load rules
+                    //  // TODO: lot's of ugh around here...
+                    //  // var highlightRules = require("ace/mode/javascript_highlight_rules").JavascriptHighlightRules;
 
-					// 	// dynamic loading of language... but then we have to delay and re-evaluate syntax afterwards...
-					// 	// var modee = 'ace/mode/php';
-					// 	// config.loadModule(['mode', modee], function(m) {
-					// 	// 	console.log(m);
-					// 	// });
+                    //  // dynamic loading of language... but then we have to delay and re-evaluate syntax afterwards...
+                    //  // var modee = 'ace/mode/php';
+                    //  // config.loadModule(['mode', modee], function(m) {
+                    //  //  console.log(m);
+                    //  // });
 
-					// 	var mode = require("ace/mode/" + language);
-					// 	var highlightRules = mode.HighlightRules;
-						
-					// 	// TODO: but what about the mode, can wel call? createModeDelegates here?
-					// 	OhGeezNoteHighlightRules.embedRules(highlightRules, prefix, [
-					// 		// {
-					// 		// 	token : "keyword",
-					// 		// 	regex: "^endstyle\\s*$",
-					// 		// 	next  : "start"
-					// 		// }
-					// 		// {
-					// 		// 	token: "indent",
-					// 		// 	regex: /^\s*$/
-					// 		// },
-					// 		// {
-					// 		// 	token: "indent",
-					// 		// 	regex: /^\s*/,
-					// 		// 	onMatch: function(val, state, stack) {
-					// 		// 		var curIndent = stack[STACK_INDENT];
+                    //  var mode = require("ace/mode/" + language);
+                    //  var highlightRules = mode.HighlightRules;
+                        
+                    //  // TODO: but what about the mode, can wel call? createModeDelegates here?
+                    //  OhGeezNoteHighlightRules.embedRules(highlightRules, prefix, [
+                    //      // {
+                    //      //  token : "keyword",
+                    //      //  regex: "^endstyle\\s*$",
+                    //      //  next  : "start"
+                    //      // }
+                    //      // {
+                    //      //  token: "indent",
+                    //      //  regex: /^\s*$/
+                    //      // },
+                    //      // {
+                    //      //  token: "indent",
+                    //      //  regex: /^\s*/,
+                    //      //  onMatch: function(val, state, stack) {
+                    //      //      var curIndent = stack[STACK_INDENT];
 
-					// 		// 		if (curIndent >= val.length) {
-					// 		// 			this.next = "start";
-					// 		// 			stack.splice(0); // empty the array
-					// 		// 		}
-					// 		// 		else {
-					// 		// 			this.next = "language";
-					// 		// 		}
-					// 		// 		return this.token;
-					// 		// 	},
-					// 		// 	next: "language"
-					// 		// },
-					// 		// {
-					// 		// 	// TODO: this is not really things... sould only apply if no language matches it
-					// 		// 	token: "punctuation",
-					// 		// 	regex: '.+'
-					// 		// }
-					// 	]);
+                    //      //      if (curIndent >= val.length) {
+                    //      //          this.next = "start";
+                    //      //          stack.splice(0); // empty the array
+                    //      //      }
+                    //      //      else {
+                    //      //          this.next = "language";
+                    //      //      }
+                    //      //      return this.token;
+                    //      //  },
+                    //      //  next: "language"
+                    //      // },
+                    //      // {
+                    //      //  // TODO: this is not really things... sould only apply if no language matches it
+                    //      //  token: "punctuation",
+                    //      //  regex: '.+'
+                    //      // }
+                    //  ]);
 
-					// 	return "start";
-					// }
+                    //  return "start";
+                    // }
 
-					// TODO: if language is unknown, decide how to handle
-					return prefix + "start";
-				}
-			},
-		],
-	};
+                    // TODO: if language is unknown, decide how to handle
+                    return prefix + "start";
+                }
+            },
+        ],
+    };
 
-	for (var i = 0; i < LANGUAGES.length; i++) {
-		var language = LANGUAGES[i];
-		var prefix = language + '-';
+    for (var i = 0; i < LANGUAGES.length; i++) {
+        var language = LANGUAGES[i];
+        var prefix = language + '-';
 
-		// TODO: figure out how to make something like this work instead...
-		// var mode = require("ace/mode/" + language);
-		// var highlightRules = mode.HighlightRules;
-		var mode = require("ace/mode/" + language + "_highlight_rules");
-		var highlightRules = findValueBySuffix(mode, 'HighlightRules');
+        // TODO: figure out how to make something like this work instead...
+        // var mode = require("ace/mode/" + language);
+        // var highlightRules = mode.HighlightRules;
+        var mode = require("ace/mode/" + language + "_highlight_rules");
+        var highlightRules = findValueBySuffix(mode, 'HighlightRules');
 
-		// TODO: but what about the mode, can wel call? createModeDelegates here?
-		this.embedRules(highlightRules, prefix, [
-			{
-				token: "indent",
-				regex: /^\s*$/
-			},
-			{
-				token: "indent",
-				regex: /^\s*/,
-				onMatch: function(val, state, stack) {
-					// var yep = stack.pop();
-					var yep = stack[stack.length - 1];
-					var languageIndent = yep.indent;
-					// var languageIndent = stack[stack.length - 2];
-					// console.log('stack', languageIndent);
-					// console.log(JSON.stringify(val), val.length);
+        // TODO: but what about the mode, can wel call? createModeDelegates here?
+        this.embedRules(highlightRules, prefix, [
+            {
+                token: "indent",
+                regex: /^\s*$/
+            },
+            {
+                token: "indent",
+                regex: /^\s*/,
+                onMatch: function(val, state, stack) {
+                    // var yep = stack.pop();
+                    var yep = stack[stack.length - 1];
+                    var languageIndent = yep.indent;
+                    // var languageIndent = stack[stack.length - 2];
+                    // console.log('stack', languageIndent);
+                    // console.log(JSON.stringify(val), val.length);
 
-					if (val.length <= languageIndent) {
-					// if (languageIndent >= val.length) {
-						this.next = "start";
-						console.log(JSON.stringify(stack));
-						stack.splice(0); // empty the array
-						// stack.pop(); // empty the array
-						// stack.splice(-1);
-						console.log(JSON.stringify(stack));
-					}
+                    if (val.length <= languageIndent) {
+                    // if (languageIndent >= val.length) {
+                        this.next = "start";
+                        console.log(JSON.stringify(stack));
+                        stack.splice(0); // empty the array
+                        // stack.pop(); // empty the array
+                        // stack.splice(-1);
+                        console.log(JSON.stringify(stack));
+                    }
 
-					return this.token;
-				},
-				next: prefix + "start"
-			},
-		]);
-	}
+                    return this.token;
+                },
+                next: prefix + "start"
+            },
+        ]);
+    }
 
-	this.normalizeRules();
+    this.normalizeRules();
 
 };
 
@@ -239,31 +239,31 @@ var MatchingBraceOutdent = function() {};
 
 (function() {
 
-	this.checkOutdent = function(line, input) {
-		if (! /^\s+$/.test(line))
-			return false;
+    this.checkOutdent = function(line, input) {
+        if (! /^\s+$/.test(line))
+            return false;
 
-		return /^\s*\}/.test(input);
-	};
+        return /^\s*\}/.test(input);
+    };
 
-	this.autoOutdent = function(doc, row) {
-		var line = doc.getLine(row);
-		var match = line.match(/^(\s*\})/);
+    this.autoOutdent = function(doc, row) {
+        var line = doc.getLine(row);
+        var match = line.match(/^(\s*\})/);
 
-		if (!match) return 0;
+        if (!match) return 0;
 
-		var column = match[1].length;
-		var openBracePos = doc.findMatchingBracket({row: row, column: column});
+        var column = match[1].length;
+        var openBracePos = doc.findMatchingBracket({row: row, column: column});
 
-		if (!openBracePos || openBracePos.row == row) return 0;
+        if (!openBracePos || openBracePos.row == row) return 0;
 
-		var indent = this.$getIndent(doc.getLine(openBracePos.row));
-		doc.replace(new Range(row, 0, row, column-1), indent);
-	};
+        var indent = this.$getIndent(doc.getLine(openBracePos.row));
+        doc.replace(new Range(row, 0, row, column-1), indent);
+    };
 
-	this.$getIndent = function(line) {
-		return line.match(/^\s*/)[0];
-	};
+    this.$getIndent = function(line) {
+        return line.match(/^\s*/)[0];
+    };
 
 }).call(MatchingBraceOutdent.prototype);
 
@@ -282,76 +282,76 @@ oop.inherits(FoldMode, BaseFoldMode);
 
 (function() {
 
-	this.getFoldWidgetRange = function(session, foldStyle, row) {
-		var range = this.indentationBlock(session, row);
-		if (range)
-			return range;
+    this.getFoldWidgetRange = function(session, foldStyle, row) {
+        var range = this.indentationBlock(session, row);
+        if (range)
+            return range;
 
-		var re = /\S/;
-		var line = session.getLine(row);
-		var startLevel = line.search(re);
-		if (startLevel == -1 || line[startLevel] != "#")
-			return;
+        var re = /\S/;
+        var line = session.getLine(row);
+        var startLevel = line.search(re);
+        if (startLevel == -1 || line[startLevel] != "#")
+            return;
 
-		var startColumn = line.length;
-		var maxRow = session.getLength();
-		var startRow = row;
-		var endRow = row;
+        var startColumn = line.length;
+        var maxRow = session.getLength();
+        var startRow = row;
+        var endRow = row;
 
-		while (++row < maxRow) {
-			line = session.getLine(row);
-			var level = line.search(re);
+        while (++row < maxRow) {
+            line = session.getLine(row);
+            var level = line.search(re);
 
-			if (level == -1)
-				continue;
+            if (level == -1)
+                continue;
 
-			if (line[level] != "#")
-				break;
+            if (line[level] != "#")
+                break;
 
-			endRow = row;
-		}
+            endRow = row;
+        }
 
-		if (endRow > startRow) {
-			var endColumn = session.getLine(endRow).length;
-			return new Range(startRow, startColumn, endRow, endColumn);
-		}
-	};
-	this.getFoldWidget = function(session, foldStyle, row) {
-		var line = session.getLine(row);
-		var indent = line.search(/\S/);
-		var next = session.getLine(row + 1);
-		var prev = session.getLine(row - 1);
-		var prevIndent = prev.search(/\S/);
-		var nextIndent = next.search(/\S/);
+        if (endRow > startRow) {
+            var endColumn = session.getLine(endRow).length;
+            return new Range(startRow, startColumn, endRow, endColumn);
+        }
+    };
+    this.getFoldWidget = function(session, foldStyle, row) {
+        var line = session.getLine(row);
+        var indent = line.search(/\S/);
+        var next = session.getLine(row + 1);
+        var prev = session.getLine(row - 1);
+        var prevIndent = prev.search(/\S/);
+        var nextIndent = next.search(/\S/);
 
-		if (indent == -1) {
-			session.foldWidgets[row - 1] = prevIndent!= -1 && prevIndent < nextIndent ? "start" : "";
-			return "";
-		}
-		if (prevIndent == -1) {
-			if (indent == nextIndent && line[indent] == "#" && next[indent] == "#") {
-				session.foldWidgets[row - 1] = "";
-				session.foldWidgets[row + 1] = "";
-				return "start";
-			}
-		} else if (prevIndent == indent && line[indent] == "#" && prev[indent] == "#") {
-			if (session.getLine(row - 2).search(/\S/) == -1) {
-				session.foldWidgets[row - 1] = "start";
-				session.foldWidgets[row + 1] = "";
-				return "";
-			}
-		}
+        if (indent == -1) {
+            session.foldWidgets[row - 1] = prevIndent!= -1 && prevIndent < nextIndent ? "start" : "";
+            return "";
+        }
+        if (prevIndent == -1) {
+            if (indent == nextIndent && line[indent] == "#" && next[indent] == "#") {
+                session.foldWidgets[row - 1] = "";
+                session.foldWidgets[row + 1] = "";
+                return "start";
+            }
+        } else if (prevIndent == indent && line[indent] == "#" && prev[indent] == "#") {
+            if (session.getLine(row - 2).search(/\S/) == -1) {
+                session.foldWidgets[row - 1] = "start";
+                session.foldWidgets[row + 1] = "";
+                return "";
+            }
+        }
 
-		if (prevIndent!= -1 && prevIndent < indent)
-			session.foldWidgets[row - 1] = "start";
-		else
-			session.foldWidgets[row - 1] = "";
+        if (prevIndent!= -1 && prevIndent < indent)
+            session.foldWidgets[row - 1] = "start";
+        else
+            session.foldWidgets[row - 1] = "";
 
-		if (indent < nextIndent)
-			return "start";
-		else
-			return "";
-	};
+        if (indent < nextIndent)
+            return "start";
+        else
+            return "";
+    };
 
 }).call(FoldMode.prototype);
 
@@ -367,39 +367,39 @@ var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutd
 var FoldMode = require("./folding/coffee").FoldMode;
 
 var Mode = function() {
-	this.HighlightRules = NoteHighlightRules;
-	this.$outdent = new MatchingBraceOutdent();
-	this.foldingRules = new FoldMode();
-	this.$behaviour = this.$defaultBehaviour;
+    this.HighlightRules = NoteHighlightRules;
+    this.$outdent = new MatchingBraceOutdent();
+    this.foldingRules = new FoldMode();
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 
 (function() {
 
-	this.lineCommentStart = "#";
+    this.lineCommentStart = "#";
 
-	this.getNextLineIndent = function(state, line, tab) {
-		var indent = this.$getIndent(line);
+    this.getNextLineIndent = function(state, line, tab) {
+        var indent = this.$getIndent(line);
 
-		if (state == "start") {
-			var match = line.match(/^.*[\{\(\[]\s*$/);
-			if (match) {
-				indent += tab;
-			}
-		}
+        if (state == "start") {
+            var match = line.match(/^.*[\{\(\[]\s*$/);
+            if (match) {
+                indent += tab;
+            }
+        }
 
-		return indent;
-	};
+        return indent;
+    };
 
-	this.checkOutdent = function(state, line, input) {
-		return this.$outdent.checkOutdent(line, input);
-	};
+    this.checkOutdent = function(state, line, input) {
+        return this.$outdent.checkOutdent(line, input);
+    };
 
-	this.autoOutdent = function(state, doc, row) {
-		this.$outdent.autoOutdent(doc, row);
-	};
+    this.autoOutdent = function(state, doc, row) {
+        this.$outdent.autoOutdent(doc, row);
+    };
 
-	this.$id = "ace/mode/note";
+    this.$id = "ace/mode/note";
 }).call(Mode.prototype);
 
 exports.Mode = Mode;
